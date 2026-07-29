@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { RealtimeBridge } from "@/components/RealtimeBridge";
 
 // App shell. The full three-column responsive frame (two section panes +
 // shared calendar) is built in M2/M5; this M0 scaffold establishes the
@@ -16,5 +17,10 @@ export default async function AppLayout({
 
   if (!user) redirect("/login");
 
-  return <div className="min-h-dvh bg-ground">{children}</div>;
+  return (
+    <div className="min-h-dvh bg-ground">
+      <RealtimeBridge />
+      {children}
+    </div>
+  );
 }

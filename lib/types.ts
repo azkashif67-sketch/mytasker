@@ -14,8 +14,13 @@
 export type ItemKind = "task" | "goal";
 export type ItemStatus = "unfinished" | "ongoing" | "completed";
 
+// NOTE: the row/insert shapes below are `type` aliases, not interfaces, on
+// purpose — supabase-js requires each to be assignable to Record<string,
+// unknown> (GenericSchema), and interfaces are not implicitly assignable to an
+// index signature. Keep them as `type` when regenerating by hand.
+
 /** Columns shared by the writable `tasks` / `goals` views. */
-interface SectionViewRow {
+type SectionViewRow = {
   id: string;
   user_id: string;
   kind: ItemKind;
@@ -31,7 +36,7 @@ interface SectionViewRow {
   updated_at: string;
 }
 
-interface SectionViewInsert {
+type SectionViewInsert = {
   id?: string;
   user_id?: string;
   kind?: ItemKind; // defaults correctly per view
@@ -47,7 +52,7 @@ interface SectionViewInsert {
 type SectionViewUpdate = Partial<SectionViewInsert>;
 
 /** Enriched read rows from `*_board` / `calendar` (brief §5). */
-export interface BoardRow {
+export type BoardRow = {
   id: string;
   user_id: string;
   kind: ItemKind;
@@ -70,7 +75,7 @@ export interface BoardRow {
 }
 
 /** Per-day load row from `daily_load` (brief §5). */
-export interface DailyLoadRow {
+export type DailyLoadRow = {
   user_id: string;
   day: string;
   day_label: string;
@@ -84,7 +89,7 @@ export interface DailyLoadRow {
   completed_count: number;
 }
 
-export interface SettingsRow {
+export type SettingsRow = {
   user_id: string;
   timezone: string;
   daily_budget_minutes: number;
