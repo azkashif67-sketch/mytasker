@@ -5,14 +5,15 @@ prompt"). One line each; newest at the bottom.
 
 ## M0 — Infrastructure & scaffold
 
-- **Auth token verification route.** The brief mandates magic-link auth but not
-  the landing route. Chose Supabase's `token_hash` + `verifyOtp` flow at
-  `/auth/confirm`, redirecting to `/` on success and `/login?error=link` on
-  failure. Login uses `shouldCreateUser: false` so the link never self-provisions
-  an account (sign-ups are also off in the dashboard).
-- **Route grouping.** `/login` lives in the `(auth)` group and `/auth/confirm` is
-  a plain route handler (not guarded); everything else is under `(app)` and
-  guarded by both the middleware and the `(app)` layout's `getUser()` check.
+- **Auth method — password, not magic link (owner override).** The brief
+  specified email magic-link auth; the owner asked for **email + password**
+  sign-in instead. Login now uses `signInWithPassword` on `/login`. There is
+  still no sign-up screen — the single account is created from the Supabase
+  dashboard with public sign-ups off. The magic-link `/auth/confirm` route was
+  removed.
+- **Route grouping.** `/login` lives in the `(auth)` group; everything else is
+  under `(app)` and guarded by both the middleware and the `(app)` layout's
+  `getUser()` check.
 - **Generated types.** No Supabase project exists yet, so `lib/types.ts` is a
   hand-written `Database` type mirroring Appendix A. It is replaced by
   `npm run gen:types` output once a project ref is available.

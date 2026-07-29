@@ -13,7 +13,7 @@ productivity app.
 ## Stack
 
 - **Next.js 15** (App Router, TypeScript strict) on **Vercel Hobby**
-- **Supabase** (Postgres, RLS, realtime) — magic-link auth, single user
+- **Supabase** (Postgres, RLS, realtime) — email + password auth, single user
 - **TanStack Query v5** — optimistic updates with rollback
 - **FullCalendar 6** (daygrid / timegrid / interaction)
 - **Tailwind** with tokens from the brief §13; **Lucide** icons
@@ -21,7 +21,7 @@ productivity app.
 ## Status — milestone checkpoints
 
 - [x] **M0 — Infrastructure &amp; scaffold** (this commit): Next.js app, Tailwind
-      tokens, Supabase clients + middleware auth guard, magic-link login,
+      tokens, Supabase clients + middleware auth guard, email/password login,
       `supabase/schema.sql` and `lib/pkt-dates.ts` copied verbatim from the brief,
       placeholder generated types, date-library tests.
 - [ ] M1 — Data layer (queries, optimistic mutations, realtime)
@@ -53,11 +53,14 @@ npm run build
 1. Create a Supabase project (free tier).
 2. Paste the entire `supabase/schema.sql` into the SQL editor and run it once.
    **Do not modify it** — the app depends on its views and RPCs exactly as given.
-3. **Auth → turn off public sign-ups.** Invite the single user by email.
-4. Copy the project URL and `anon` public key into `.env.local`
+3. **Auth → turn off public sign-ups.** Then **create the single user with an
+   email and password** (Authentication → Users → Add user). Email + password
+   is the only sign-in method; there is no sign-up screen.
+4. Copy the project URL and the **publishable / anon** public key into `.env.local`
    (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Never use the
-   service-role key in this app.
-5. Add the production URL to **Auth → redirect allow-list** so magic links work.
+   service-role / secret key in this app.
+5. Set **Auth → URL Configuration → Site URL** and add your deploy URL to the
+   redirect allow-list.
 6. Regenerate types whenever the schema changes: `npm run gen:types`.
 
 ## Dates &amp; time

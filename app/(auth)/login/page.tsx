@@ -1,34 +1,34 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-// Unauthenticated visitors see only an email field and a "Send link" button.
-// There is no sign-up screen — the single user is invited from the dashboard
-// with public sign-ups turned off (brief §3).
+// Single-user email + password sign-in. There is no sign-up screen — the one
+// account is created from the Supabase dashboard with public sign-ups off.
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [password, setPassword] = useState("");
+  const [state, setState] = useState<"idle" | "signing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
-  async function sendLink(e: React.FormEvent) {
+  async function signIn(e: React.FormEvent) {
     e.preventDefault();
-    setState("sending");
+    setState("signing");
     setError(null);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/confirm`,
-        shouldCreateUser: false, // no self sign-up
-      },
+      password,
     });
     if (error) {
       setError(error.message);
       setState("error");
-    } else {
-      setState("sent");
+      return;
     }
+    router.replace("/");
+    router.refresh();
   }
 
   return (
@@ -37,39 +37,49 @@ export default function LoginPage() {
         <h1 className="font-display text-display mb-1">Minute</h1>
         <p className="text-ink-soft text-ui mb-8">A personal task &amp; learning planner.</p>
 
-        {state === "sent" ? (
-          <p className="text-ui" role="status">
-            Check your email for a sign-in link.
-          </p>
-        ) : (
-          <form onSubmit={sendLink} className="flex flex-col gap-3">
-            <label htmlFor="email" className="sr-only">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="rounded border border-rule bg-surface px-3 py-2 text-ui"
-            />
-            <button
-              type="submit"
-              disabled={state === "sending"}
-              className="rounded bg-ink px-3 py-2 text-ui text-surface disabled:opacity-60"
-            >
-              {state === "sending" ? "Sending…" : "Send link"}
-            </button>
-            {error && (
-              <p className="text-ui text-conflict" role="alert">
-                {error}
-              </p>
-            )}
-          </form>
-        )}
+        <form onSubmit={signIn} className="flex flex-col gap-3">
+          <label htmlFor="email" className="sr-only">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="rounded border border-rule bg-surface px-3 py-2 text-ui"
+          />
+
+          <label htmlFor="password" className="sr-only">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="rounded border border-rule bg-surface px-3 py-2 text-ui"
+          />
+
+          <button
+            type="submit"
+            disabled={state === "signing"}
+            className="rounded bg-ink px-3 py-2 text-ui text-surface disabled:opacity-60"
+          >
+            {state === "signing" ? "Signing in…" : "Sign in"}
+          </button>
+
+          {error && (
+            <p className="text-ui text-conflict" role="alert">
+              {error}
+            </p>
+          )}
+        </form>
       </div>
     </main>
   );
