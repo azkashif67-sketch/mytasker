@@ -28,6 +28,8 @@ export function ItemRow({
       onKeyDown={(e) => {
         if (e.key === "Enter") onOpen();
       }}
+      data-item-id={item.id}
+      data-item-title={item.title}
       className="group relative flex min-h-[44px] cursor-pointer items-center gap-3 rounded border border-transparent px-2 py-1.5 hover:border-rule"
       style={item.is_overdue ? { boxShadow: "inset 3px 0 0 var(--overdue)" } : undefined}
       aria-label={`${item.title}, ${timeLabel}${

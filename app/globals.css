@@ -43,6 +43,43 @@ body {
   outline-offset: 2px;
 }
 
+/* --- FullCalendar theming to the palette (brief §13) --------------------- */
+.minute-calendar {
+  --fc-border-color: var(--rule);
+  --fc-page-bg-color: var(--surface);
+  --fc-neutral-bg-color: var(--ground);
+  --fc-today-bg-color: rgba(46, 78, 110, 0.06);
+  --fc-now-indicator-color: var(--conflict);
+  font-size: 12.5px;
+}
+.minute-calendar .fc {
+  background: var(--surface);
+}
+.minute-calendar .fc .fc-col-header-cell-cushion,
+.minute-calendar .fc .fc-daygrid-day-number {
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.minute-calendar .fc .fc-timegrid-slot-label-cushion {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+/* Overlap: diagonal hatch over the block's fill; the badge names the conflict
+   in the row/editor. Never colour alone (brief §12). */
+.minute-calendar .fc-overlap .fc-event-main {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.28) 0,
+    rgba(255, 255, 255, 0.28) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+}
+/* Overdue: amber leading edge (brief §12). */
+.minute-calendar .fc-overdue {
+  box-shadow: inset 3px 0 0 var(--overdue);
+}
+
 /* Honour reduced motion by dropping animation to 0ms (brief §13). */
 @media (prefers-reduced-motion: reduce) {
   *,

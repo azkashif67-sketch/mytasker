@@ -56,3 +56,17 @@ function mondayOffsetOf(day: string): number {
 export function rangeCovers(range: DateRange, day: string): boolean {
   return day >= range.start && day <= range.end;
 }
+
+/** Move the focused day by one period in the given view (brief §11, `[` `]`). */
+export function shiftPeriod(day: string, view: CalendarView, dir: -1 | 1): string {
+  if (view === "day") return addDays(day, dir);
+  if (view === "week") return addDays(day, dir * 7);
+  // month: step whole months, clamping the day-of-month.
+  const [y, m, d] = day.split("-").map(Number);
+  const target = new Date(Date.UTC(y, m - 1 + dir, 1));
+  const ty = target.getUTCFullYear();
+  const tm = target.getUTCMonth() + 1;
+  const lastDay = new Date(Date.UTC(ty, tm, 0)).getUTCDate();
+  const cd = Math.min(d, lastDay);
+  return `${ty}-${String(tm).padStart(2, "0")}-${String(cd).padStart(2, "0")}`;
+}
