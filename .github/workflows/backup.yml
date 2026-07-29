@@ -1,0 +1,90 @@
+name: Nightly backup
+
+# Dumps items + settings as JSON to a PRIVATE backup repo, then purges trash
+# older than 30 days. Doubles as the Supabase keep-alive (free projects pause
+# after ~7 idle days). Brief §16.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL                 https://<ref>.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY    the project's SECRET key (sb_secret_… / service_role).
+#                                NEVER the publishable/anon key — this must bypass RLS.
+#   BACKUP_REPO                  owner/name of a PRIVATE repo to store backups in
+#                                (do NOT use this public repo).
+#   BACKUP_TOKEN                 a fine-grained PAT with Contents: read & write on BACKUP_REPO.
+
+on:
+  schedule:
+    - cron: "0 21 * * *" # 02:00 Asia/Karachi (UTC+5)
+  workflow_dispatch: {} # manual run — use this to verify the first backup
+
+concurrency:
+  group: minute-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump items and settings
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SERVICE_KEY:-}" ]; then
+            echo "::error::SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY secrets are required."
+            exit 1
+          fi
+          mkdir -p out
+          echo "stamp=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
+          for table in items settings; do
+            echo "Dumping $table…"
+            curl -sS --fail-with-body \
+              "$SUPABASE_URL/rest/v1/$table?select=*" \
+              -H "apikey: $SERVICE_KEY" \
+              -H "Authorization: Bearer $SERVICE_KEY" \
+              -H "Accept: application/json" \
+              -o "out/$table.json"
+            # Fail if the response is not a JSON array (e.g. an auth error object).
+            head -c1 "out/$table.json" | grep -q '\[' || {
+              echo "::error::$table dump did not return a JSON array:"; cat "out/$table.json"; exit 1;
+            }
+          done
+
+      - name: Purge trash older than 30 days
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          echo "Purged rows: $(curl -sS --fail-with-body -X POST \
+            "$SUPABASE_URL/rest/v1/rpc/purge_trash" \
+            -H "apikey: $SERVICE_KEY" \
+            -H "Authorization: Bearer $SERVICE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{}')"
+
+      - name: Commit to the private backup repo
+        env:
+          BACKUP_REPO: ${{ secrets.BACKUP_REPO }}
+          BACKUP_TOKEN: ${{ secrets.BACKUP_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BACKUP_REPO:-}" ] || [ -z "${BACKUP_TOKEN:-}" ]; then
+            echo "::error::BACKUP_REPO and BACKUP_TOKEN secrets are required (a PRIVATE repo)."
+            exit 1
+          fi
+          git clone --depth 1 "https://x-access-token:${BACKUP_TOKEN}@github.com/${BACKUP_REPO}.git" backup-repo
+          dest="backup-repo/backups/${stamp}"
+          mkdir -p "$dest"
+          cp out/items.json out/settings.json "$dest/"
+          cd backup-repo
+          git config user.name "minute-backup"
+          git config user.email "minute-backup@users.noreply.github.com"
+          git add backups
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Backup ${stamp}"
+            git push
+          fi

@@ -29,7 +29,7 @@ productivity app.
 - [x] M3 — Calendar (month/week/day, four move routes, sweep)
 - [x] M4 — Minute Ledger &amp; flags (strip / bar / inline)
 - [x] M5 — Polish (tokens, keyboard map, a11y, responsive, PWA)
-- [ ] M6 — Ship (domain, backups, acceptance list) — owner-driven
+- [x] M6 — Backups workflow committed; deploy + acceptance are owner-driven
 
 ## Keyboard
 
@@ -74,6 +74,29 @@ npm run build
 Every date is a **Pakistan calendar date** stored as `'YYYY-MM-DD'` — a label,
 never an instant. All date handling goes through `lib/pkt-dates.ts`, which mirrors
 the server's `public.fmt_day()`. Never use `new Date()` with local getters.
+
+## Backups &amp; keep-alive
+
+`.github/workflows/backup.yml` runs nightly (02:00 PKT) and on demand. It dumps
+`items` + `settings` to JSON, calls `purge_trash()` (drops rows trashed &gt;30 days
+ago), and commits the JSON to a **separate private repo**. The same run keeps the
+free Supabase project from pausing after ~7 idle days.
+
+> ⚠️ This app repo is **public**, so backups must never land here. The workflow
+> pushes to a private `BACKUP_REPO` you own.
+
+Set these under **Settings → Secrets and variables → Actions**:
+
+| Secret | Value |
+|---|---|
+| `SUPABASE_URL` | `https://<ref>.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | the project's **Secret** key (`sb_secret_…` / service_role) — **not** the publishable key; it must bypass RLS to read every row |
+| `BACKUP_REPO` | `owner/name` of a **private** repo you create for backups |
+| `BACKUP_TOKEN` | a fine-grained PAT with **Contents: read &amp; write** on `BACKUP_REPO` |
+
+Then **verify the first run manually**: Actions → *Nightly backup* → *Run
+workflow*. Confirm a dated folder appears under `backups/` in the private repo,
+and that the JSON restores cleanly into a scratch Supabase project.
 
 ## Out of scope for v1 (v2 list)
 
