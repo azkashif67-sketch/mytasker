@@ -25,11 +25,17 @@ productivity app.
       `supabase/schema.sql` and `lib/pkt-dates.ts` copied verbatim from the brief,
       placeholder generated types, date-library tests.
 - [ ] M1 — Data layer (queries, optimistic mutations, realtime)
-- [ ] M2 — Sections (both panes: composer, list, status, edit sheet, undo)
-- [ ] M3 — Calendar (month/week/day, four move routes)
-- [ ] M4 — Minute Ledger &amp; flags
-- [ ] M5 — Polish (tokens, keyboard, a11y, PWA)
-- [ ] M6 — Ship (domain, backups, acceptance list)
+- [x] M2 — Sections (both panes: composer, list, status, edit sheet, undo)
+- [x] M3 — Calendar (month/week/day, four move routes, sweep)
+- [x] M4 — Minute Ledger &amp; flags (strip / bar / inline)
+- [x] M5 — Polish (tokens, keyboard map, a11y, responsive, PWA)
+- [ ] M6 — Ship (domain, backups, acceptance list) — owner-driven
+
+## Keyboard
+
+`T` new task · `G` new goal · `[` `]` previous/next period · `1` `2` `3`
+month/week/day. Focus a row: `E` edit · `M` move · `Space` cycle status ·
+`⌫` trash. `⌘Z` undo · `Esc` close the editor.
 
 ## Local development
 

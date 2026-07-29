@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Providers } from "./providers";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 // Type roles from the brief §13.
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
   title: "Minute",
   description: "A personal task & learning planner.",
   manifest: "/manifest.webmanifest",
+  icons: { icon: "/icons/icon.svg", apple: "/icons/icon.svg" },
   appleWebApp: { capable: true, title: "Minute", statusBarStyle: "default" },
 };
 
@@ -48,6 +50,7 @@ export default function RootLayout({
     <html lang="en" className={`${display.variable} ${body.variable} ${data.variable}`}>
       <body>
         <Providers>{children}</Providers>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

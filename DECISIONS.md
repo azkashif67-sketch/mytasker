@@ -40,3 +40,23 @@ prompt"). One line each; newest at the bottom.
   `buildLedger()` in `lib/ledger.ts`. Month cells render the `strip` via
   FullCalendar `dayCellContent`; section-pane headers and the day-view header
   render the `bar`; the day-view header also shows the hoverable `inline`.
+
+## M5 — Polish
+
+- **PWA icon is a maskable SVG**, not raster PNGs. This container can't run an
+  image toolchain, and an SVG with `purpose: "any maskable"` satisfies the
+  manifest and installability on Chromium/Android. A raster `apple-touch-icon`
+  PNG set is a small follow-up for the best iOS home-screen result.
+- **Service worker is app-shell only** (`public/sw.js`): navigations are
+  network-first with a cached `/` fallback; `/_next/static` + icons are
+  cache-first; cross-origin (Supabase) always hits the network. No offline
+  writes in v1 — the composers disable and a persistent offline strip shows
+  (brief §16).
+- **Keyboard move** (`M`) opens a small date-picker popover (`MovePopover`) as
+  the DnD equivalent (brief §15); row-scoped keys (`E`/`M`/`Space`/`⌫`) live on
+  `ItemRow`, global keys (`T`/`G`/`[`/`]`/`1`/`2`/`3`/`⌘Z`) on the Planner.
+- **Mobile = 3-tab** (Tasks · Calendar · Learning) below `lg`; the three desktop
+  columns become one visible panel driven by the bottom tab bar, and tapping
+  Calendar defaults to Day view. Desktop keeps the three-column layout.
+- **Live region** (`Announcer`) announces status changes, moves, deletes and
+  restores for screen readers (brief §15).

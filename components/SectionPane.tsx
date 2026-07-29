@@ -9,6 +9,7 @@ import type { BoardRow, ItemKind, ItemStatus } from "@/lib/types";
 import { ItemComposer, type ComposerHandle } from "@/components/ItemComposer";
 import { ItemRow } from "@/components/ItemRow";
 import { MinuteLedger } from "@/components/MinuteLedger";
+import { useAnnounce } from "@/components/Announcer";
 
 // One component for both sections, parameterised by `kind` (brief §10). The only
 // differences are the accent colour, the composer's required-duration hint, and
@@ -21,10 +22,18 @@ const COPY = {
 
 export const SectionPane = forwardRef<
   ComposerHandle,
-  { kind: ItemKind; day: string; range: DateRange; onOpen: (item: BoardRow) => void }
->(function SectionPane({ kind, day, range, onOpen }, composerRef) {
+  {
+    kind: ItemKind;
+    day: string;
+    range: DateRange;
+    onOpen: (item: BoardRow) => void;
+    onMove: (item: BoardRow) => void;
+    onTrash: (item: BoardRow) => void;
+  }
+>(function SectionPane({ kind, day, range, onOpen, onMove, onTrash }, composerRef) {
   const board = useBoard(kind, range);
   const update = useUpdateItem();
+  const announce = useAnnounce();
 
   const items = orderForSection((board.data ?? []).filter((i) => i.day === day));
   const accent = kind === "task" ? "text-task" : "text-goal";
@@ -50,9 +59,12 @@ export const SectionPane = forwardRef<
               key={item.id}
               item={item}
               onOpen={() => onOpen(item)}
-              onStatus={(next: ItemStatus) =>
-                update.mutate({ id: item.id, kind, changes: { status: next } })
-              }
+              onMove={() => onMove(item)}
+              onTrash={() => onTrash(item)}
+              onStatus={(next: ItemStatus) => {
+                update.mutate({ id: item.id, kind, changes: { status: next } });
+                announce(`${item.title} marked ${next}`);
+              }}
             />
           ))
         )}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Minute">
+  <!-- Maskable: keep the mark within the safe area (inner ~80%). -->
+  <rect width="512" height="512" fill="#2F5D50"/>
+  <g transform="translate(96 150)">
+    <!-- Three stacked ledger segments — the app's signature mark. -->
+    <rect x="0" y="0" width="320" height="46" rx="4" fill="#E6E9E4"/>
+    <rect x="0" y="83" width="230" height="46" rx="4" fill="#8FB0A6"/>
+    <rect x="0" y="166" width="150" height="46" rx="4" fill="#B67A16"/>
+  </g>
+</svg>

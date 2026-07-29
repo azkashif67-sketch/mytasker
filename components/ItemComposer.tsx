@@ -2,6 +2,7 @@
 
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useAddItem } from "@/lib/mutations";
+import { useOnline } from "@/lib/use-online";
 import {
   parseClock,
   parseMinutes,
@@ -21,6 +22,7 @@ export interface ComposerHandle {
 export const ItemComposer = forwardRef<ComposerHandle, { kind: ItemKind; day: string }>(
   function ItemComposer({ kind, day }, ref) {
     const add = useAddItem(kind);
+    const online = useOnline();
     const titleRef = useRef<HTMLInputElement>(null);
     const [title, setTitle] = useState("");
     const [minutes, setMinutes] = useState("");
@@ -31,6 +33,7 @@ export const ItemComposer = forwardRef<ComposerHandle, { kind: ItemKind; day: st
 
     function submit(e: React.FormEvent) {
       e.preventDefault();
+      if (!online) return; // no offline writes in v1 (brief §16)
       const draft = {
         title,
         start_minute: parseClock(time),
@@ -59,13 +62,18 @@ export const ItemComposer = forwardRef<ComposerHandle, { kind: ItemKind; day: st
 
     return (
       <form onSubmit={submit} className="flex flex-col gap-1">
-        <div className={`flex items-center gap-1 rounded border border-rule bg-surface px-2 py-1 ${accent}`}>
+        <div
+          className={`flex items-center gap-1 rounded border border-rule bg-surface px-2 py-1 ${accent} ${
+            online ? "" : "opacity-50"
+          }`}
+        >
           <input
             ref={titleRef}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={`New ${noun}`}
+            placeholder={online ? `New ${noun}` : "Offline"}
             aria-label={`New ${noun} title`}
+            disabled={!online}
             className="min-w-0 flex-1 bg-transparent text-ui outline-none"
           />
           <input
@@ -74,6 +82,7 @@ export const ItemComposer = forwardRef<ComposerHandle, { kind: ItemKind; day: st
             placeholder="time"
             aria-label="Start time, optional"
             inputMode="numeric"
+            disabled={!online}
             className="tabular w-14 bg-transparent text-data text-ink-soft outline-none"
           />
           <input
@@ -82,9 +91,15 @@ export const ItemComposer = forwardRef<ComposerHandle, { kind: ItemKind; day: st
             placeholder={kind === "goal" ? "min*" : "min"}
             aria-label={kind === "goal" ? "Duration in minutes, required" : "Duration in minutes, optional"}
             inputMode="numeric"
+            disabled={!online}
             className="tabular w-12 bg-transparent text-data text-ink-soft outline-none"
           />
-          <button type="submit" className="rounded px-1.5 text-ui text-ink-soft hover:text-ink" aria-label={`Add ${noun}`}>
+          <button
+            type="submit"
+            disabled={!online}
+            className="rounded px-1.5 text-ui text-ink-soft hover:text-ink disabled:opacity-50"
+            aria-label={`Add ${noun}`}
+          >
             +
           </button>
         </div>
