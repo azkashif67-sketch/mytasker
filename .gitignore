@@ -1,24 +1,40 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-.eggs/
-build/
-dist/
-.venv/
-venv/
-env/
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
 
-# Test / coverage
-.pytest_cache/
-.coverage
-htmlcov/
+# next.js
+/.next/
+/out/
+next-env.d.ts
 
-# Editors / OS
+# production
+/build
+
+# testing
+/coverage
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files — never commit secrets
+.env
+.env*.local
+.env.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# editors
 .vscode/
 .idea/
-.DS_Store
-
-# MyTasker local data store
-.mytasker/
-tasks.json

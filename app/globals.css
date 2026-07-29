@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Palette tokens from the brief §13, also exposed as CSS variables so
+ * non-Tailwind surfaces (FullCalendar theming, the ledger, SVG) can read them.
+ */
+:root {
+  --ground: #e6e9e4;
+  --surface: #f4f6f2;
+  --ink: #14181a;
+  --ink-soft: #5b6560;
+  --rule: #c9cfc7;
+
+  --task: #2e4e6e;
+  --goal: #2f5d50;
+  --overdue: #b67a16;
+  --conflict: #a32e3c;
+}
+
+html,
+body {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Data role: minute values, durations, clock times, counters. Tabular so
+   they align down a column (brief §13). */
+.tabular {
+  font-family: var(--font-data), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Visible 2px focus ring on every interactive element (brief §15). */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Honour reduced motion by dropping animation to 0ms (brief §13). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}

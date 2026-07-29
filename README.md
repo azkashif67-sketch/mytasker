@@ -1,96 +1,77 @@
-# MyTasker
+# Minute
 
-A simple, dependency-free command-line task manager written in Python. Add
-tasks, set priorities, mark them done, and keep track of what's left — all from
-your terminal, with data stored in a plain JSON file.
+A single-user daily task &amp; learning planner. Tasks and learning goals live in
+two sections with their own controls and appear together on one shared calendar,
+measured against a 300-minute daily budget. Built to be fast to type into and
+clear to read at a glance — a drafting instrument for a day's minutes, not a
+productivity app.
 
-## Features
+> Built from a fixed brief. The governing principle: **the system never blocks,
+> it flags.** Overlaps, over-budget days and overdue items are all legal states,
+> surfaced loudly and rescheduled by the owner — never by the app.
 
-- Add tasks with `low` / `medium` / `high` priority
-- List all, pending, or completed tasks
-- Complete, reopen, and remove tasks
-- Clear out completed tasks in one command
-- Human-readable JSON storage, atomically written so it won't corrupt
-- No third-party runtime dependencies — just the Python standard library
+## Stack
 
-## Requirements
+- **Next.js 15** (App Router, TypeScript strict) on **Vercel Hobby**
+- **Supabase** (Postgres, RLS, realtime) — magic-link auth, single user
+- **TanStack Query v5** — optimistic updates with rollback
+- **FullCalendar 6** (daygrid / timegrid / interaction)
+- **Tailwind** with tokens from the brief §13; **Lucide** icons
 
-- Python 3.9 or newer
+## Status — milestone checkpoints
 
-## Installation
+- [x] **M0 — Infrastructure &amp; scaffold** (this commit): Next.js app, Tailwind
+      tokens, Supabase clients + middleware auth guard, magic-link login,
+      `supabase/schema.sql` and `lib/pkt-dates.ts` copied verbatim from the brief,
+      placeholder generated types, date-library tests.
+- [ ] M1 — Data layer (queries, optimistic mutations, realtime)
+- [ ] M2 — Sections (both panes: composer, list, status, edit sheet, undo)
+- [ ] M3 — Calendar (month/week/day, four move routes)
+- [ ] M4 — Minute Ledger &amp; flags
+- [ ] M5 — Polish (tokens, keyboard, a11y, PWA)
+- [ ] M6 — Ship (domain, backups, acceptance list)
 
-Clone the repository and install it (a virtual environment is recommended):
-
-```bash
-git clone https://github.com/azkashif67-sketch/mytasker.git
-cd mytasker
-pip install -e .
-```
-
-This installs the `mytasker` command. You can also run it without installing:
-
-```bash
-python -m mytasker --help
-```
-
-## Usage
+## Local development
 
 ```bash
-# Add tasks
-mytasker add "Write the quarterly report" --priority high
-mytasker add "Water the plants" -p low
-
-# List tasks
-mytasker list              # everything
-mytasker list --pending    # only unfinished
-mytasker list --completed  # only finished
-
-# Update tasks
-mytasker done 1            # mark task 1 complete
-mytasker reopen 1          # mark it pending again
-mytasker remove 2          # delete task 2
-mytasker clear             # remove all completed tasks
+npm install
+cp .env.example .env.local   # fill in from your Supabase project
+npm run dev                  # http://localhost:3000
 ```
 
-Example list output (priority shown as `!!` for high, ` !` for medium):
-
-```
-  1 [ ] !! Write the quarterly report
-  2 [x]    Water the plants
-```
-
-## Data storage
-
-Tasks are stored in `~/.mytasker/tasks.json` by default. Set the
-`MYTASKER_STORE` environment variable to use a different location:
+Quality gates:
 
 ```bash
-export MYTASKER_STORE=/path/to/my/tasks.json
+npm run typecheck
+npm run lint
+npm run test
+npm run build
 ```
 
-## Development
+## Supabase setup (owner)
 
-Install the development dependencies and run the test suite:
+1. Create a Supabase project (free tier).
+2. Paste the entire `supabase/schema.sql` into the SQL editor and run it once.
+   **Do not modify it** — the app depends on its views and RPCs exactly as given.
+3. **Auth → turn off public sign-ups.** Invite the single user by email.
+4. Copy the project URL and `anon` public key into `.env.local`
+   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Never use the
+   service-role key in this app.
+5. Add the production URL to **Auth → redirect allow-list** so magic links work.
+6. Regenerate types whenever the schema changes: `npm run gen:types`.
 
-```bash
-pip install -e ".[dev]"
-pytest
-```
+## Dates &amp; time
 
-## Project layout
+Every date is a **Pakistan calendar date** stored as `'YYYY-MM-DD'` — a label,
+never an instant. All date handling goes through `lib/pkt-dates.ts`, which mirrors
+the server's `public.fmt_day()`. Never use `new Date()` with local getters.
 
-```
-mytasker/
-├── __init__.py     # package metadata / version
-├── __main__.py     # enables `python -m mytasker`
-├── models.py       # Task dataclass
-├── storage.py      # JSON persistence
-├── manager.py      # core task operations
-└── cli.py          # argparse command-line interface
-tests/
-└── test_mytasker.py
-```
+## Out of scope for v1 (v2 list)
+
+Recurring goals · time tracking or timers · tags and projects · search ·
+notifications · sharing or multi-user · calendar import/export · analytics
+dashboards · offline writes · drag-reordering within a list.
 
 ## License
 
-Released under the [MIT License](LICENSE).
+Private, single-user project.
