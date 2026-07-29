@@ -10,8 +10,10 @@ import type { EventDropArg, EventClickArg } from "@fullcalendar/core";
 import { useCalendar } from "@/lib/queries";
 import { useMoveItem, useUpdateItem } from "@/lib/mutations";
 import { eventFromRow, minuteOfDayPKT, dayStringPKT } from "@/lib/calendar-events";
+import { MinuteLedger } from "@/components/MinuteLedger";
 import type { DateRange, CalendarView as ViewName } from "@/lib/query-keys";
 import type { BoardRow } from "@/lib/types";
+import type { DayCellContentArg } from "@fullcalendar/core";
 
 // FullCalendar 6 wrapper (daygrid / timegrid / interaction only). Month, week
 // and day; both kinds at true scale; timeZone Asia/Karachi with plain date
@@ -42,7 +44,30 @@ export function CalendarView({
   const move = useMoveItem();
   const update = useUpdateItem();
 
-  const events = (data ?? []).map(eventFromRow);
+  const rows = data ?? [];
+  const events = rows.map(eventFromRow);
+
+  // Group items by PKT day so each month cell can show its load strip (brief §13).
+  const byDay = new Map<string, BoardRow[]>();
+  for (const r of rows) {
+    const arr = byDay.get(r.day);
+    if (arr) arr.push(r);
+    else byDay.set(r.day, [r]);
+  }
+
+  // Month-cell content: the day number plus a 3px ledger strip reading that
+  // day's whole-month load without opening it.
+  function renderDayCell(arg: DayCellContentArg) {
+    if (arg.view.type !== "dayGridMonth") return undefined; // default elsewhere
+    const cellDay = dayStringPKT(arg.date);
+    const items = byDay.get(cellDay) ?? [];
+    return (
+      <div className="flex flex-col gap-1">
+        <span className="self-end text-data text-ink-soft">{arg.dayNumberText}</span>
+        {items.length > 0 && <MinuteLedger items={items} size="strip" />}
+      </div>
+    );
+  }
 
   // Keep FullCalendar's view + date in sync with the app's state.
   useEffect(() => {
@@ -101,6 +126,7 @@ export function CalendarView({
         snapDuration="00:05:00"
         slotDuration="00:30:00"
         dayMaxEvents={3}
+        dayCellContent={renderDayCell}
         events={events}
         eventClick={(arg: EventClickArg) => {
           arg.jsEvent.preventDefault();

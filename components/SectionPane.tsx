@@ -4,11 +4,11 @@ import { forwardRef } from "react";
 import { useBoard } from "@/lib/queries";
 import { useUpdateItem } from "@/lib/mutations";
 import { orderForSection } from "@/lib/item-input";
-import { dayMinutes } from "@/lib/flags";
 import type { DateRange } from "@/lib/query-keys";
 import type { BoardRow, ItemKind, ItemStatus } from "@/lib/types";
 import { ItemComposer, type ComposerHandle } from "@/components/ItemComposer";
 import { ItemRow } from "@/components/ItemRow";
+import { MinuteLedger } from "@/components/MinuteLedger";
 
 // One component for both sections, parameterised by `kind` (brief §10). The only
 // differences are the accent colour, the composer's required-duration hint, and
@@ -27,14 +27,14 @@ export const SectionPane = forwardRef<
   const update = useUpdateItem();
 
   const items = orderForSection((board.data ?? []).filter((i) => i.day === day));
-  const minutes = dayMinutes(items);
   const accent = kind === "task" ? "text-task" : "text-goal";
 
   return (
     <section className="flex w-full flex-col gap-3" aria-label={COPY[kind].heading}>
-      <header className="flex items-baseline justify-between border-b border-rule pb-2">
+      <header className="flex flex-col gap-2 border-b border-rule pb-2">
         <h2 className={`font-display text-ui uppercase tracking-wide ${accent}`}>{COPY[kind].heading}</h2>
-        <span className="tabular text-data text-ink-soft">{minutes}m</span>
+        {/* This pane's contribution to the shared 300-minute budget (brief §13). */}
+        <MinuteLedger items={items} size="bar" />
       </header>
 
       <ItemComposer ref={composerRef} kind={kind} day={day} />

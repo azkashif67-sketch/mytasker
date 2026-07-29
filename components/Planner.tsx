@@ -13,6 +13,7 @@ import { SectionPane } from "@/components/SectionPane";
 import { ItemEditor } from "@/components/ItemEditor";
 import { UndoToast } from "@/components/UndoToast";
 import { SweepBar } from "@/components/SweepBar";
+import { MinuteLedger } from "@/components/MinuteLedger";
 import { SignOutButton } from "@/components/SignOutButton";
 
 // FullCalendar is client-only; load it without SSR to avoid hydration issues.
@@ -39,6 +40,7 @@ export function Planner() {
 
   const editing = editingId ? (calendar.data ?? []).find((i) => i.id === editingId) ?? null : null;
   const overdue = (calendar.data ?? []).filter((i) => i.is_overdue);
+  const dayItems = (calendar.data ?? []).filter((i) => i.day === day);
 
   useEffect(() => {
     if (editingId && calendar.data && !calendar.data.some((i) => i.id === editingId)) {
@@ -118,6 +120,13 @@ export function Planner() {
         </div>
 
         <div className="order-1 flex min-h-[520px] flex-col gap-3 lg:order-2 lg:min-h-0">
+          {view === "day" && (
+            <div className="flex flex-col gap-1.5 rounded border border-rule bg-surface p-3">
+              {/* Day-view header ledger: both kinds against the 300-minute budget. */}
+              <MinuteLedger items={dayItems} size="bar" />
+              <MinuteLedger items={dayItems} size="inline" />
+            </div>
+          )}
           <div className="min-h-[520px] flex-1">
             <CalendarView day={day} view={view} range={range} onOpen={setEditingId} onPickDay={(d) => { setDay(d); setView("day"); }} />
           </div>

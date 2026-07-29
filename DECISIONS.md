@@ -27,3 +27,16 @@ prompt"). One line each; newest at the bottom.
 - **Testing.** Vitest (node env) for pure logic; `lib/pkt-dates.test.ts` locks the
   date invariants from §7/§18 early since they are the brief's stated top bug
   risk.
+
+## M4 — Minute Ledger & flags
+
+- **Ledger "gaps for unallotted time" = the empty remainder.** The brief's
+  phrase is read as: items pack left-to-right in chronological order as
+  proportional segments, and whatever budget is left over (300 − total) shows as
+  empty track — i.e. the gap is the unspent budget, not gaps positioned by clock
+  time. This matches the brief's framing ("how much of it is already spoken
+  for"). Over-budget overflow spills past the track's right edge in `--conflict`.
+- **One `MinuteLedger`, `size` prop** (`strip`/`bar`/`inline`) built on the pure
+  `buildLedger()` in `lib/ledger.ts`. Month cells render the `strip` via
+  FullCalendar `dayCellContent`; section-pane headers and the day-view header
+  render the `bar`; the day-view header also shows the hoverable `inline`.
