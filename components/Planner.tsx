@@ -149,18 +149,19 @@ function PlannerInner() {
         </div>
       </header>
 
+      {/* The single shared 300-minute budget for the focused day, both kinds
+          combined (brief §6). This is the whole-day status bar. */}
+      <div className="mb-4 flex flex-col gap-1.5">
+        <MinuteLedger items={dayItems} size="bar" />
+        {view === "day" && <MinuteLedger items={dayItems} size="inline" />}
+      </div>
+
       <div data-drag-source className="flex flex-1 flex-col gap-6 lg:grid lg:grid-cols-[320px_1fr_320px]">
         <div className={`${tab === "tasks" ? "block" : "hidden"} lg:block`}>
           <SectionPane ref={taskComposer} {...paneProps("task")} />
         </div>
 
         <div className={`${tab === "calendar" ? "flex" : "hidden"} min-h-[520px] flex-col gap-3 lg:flex lg:min-h-0`}>
-          {view === "day" && (
-            <div className="flex flex-col gap-1.5 rounded border border-rule bg-surface p-3">
-              <MinuteLedger items={dayItems} size="bar" />
-              <MinuteLedger items={dayItems} size="inline" />
-            </div>
-          )}
           <div className="min-h-[520px] flex-1">
             <CalendarView day={day} view={view} range={range} onOpen={setEditingId} onPickDay={(d) => { setDay(d); setView("day"); }} />
           </div>

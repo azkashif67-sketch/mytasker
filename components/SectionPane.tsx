@@ -4,11 +4,11 @@ import { forwardRef } from "react";
 import { useBoard } from "@/lib/queries";
 import { useUpdateItem } from "@/lib/mutations";
 import { orderForSection } from "@/lib/item-input";
+import { dayMinutes } from "@/lib/flags";
 import type { DateRange } from "@/lib/query-keys";
 import type { BoardRow, ItemKind, ItemStatus } from "@/lib/types";
 import { ItemComposer, type ComposerHandle } from "@/components/ItemComposer";
 import { ItemRow } from "@/components/ItemRow";
-import { MinuteLedger } from "@/components/MinuteLedger";
 import { useAnnounce } from "@/components/Announcer";
 
 // One component for both sections, parameterised by `kind` (brief §10). The only
@@ -40,10 +40,11 @@ export const SectionPane = forwardRef<
 
   return (
     <section className="flex w-full flex-col gap-3" aria-label={COPY[kind].heading}>
-      <header className="flex flex-col gap-2 border-b border-rule pb-2">
+      <header className="flex items-baseline justify-between border-b border-rule pb-2">
         <h2 className={`font-display text-ui uppercase tracking-wide ${accent}`}>{COPY[kind].heading}</h2>
-        {/* This pane's contribution to the shared 300-minute budget (brief §13). */}
-        <MinuteLedger items={items} size="bar" />
+        {/* This pane's own minute subtotal. The 300-minute budget is shared
+            across both kinds and shown once, as the combined bar in the header. */}
+        <span className="tabular text-data text-ink-soft">{dayMinutes(items)}m</span>
       </header>
 
       <ItemComposer ref={composerRef} kind={kind} day={day} />

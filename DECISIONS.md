@@ -38,8 +38,12 @@ prompt"). One line each; newest at the bottom.
   for"). Over-budget overflow spills past the track's right edge in `--conflict`.
 - **One `MinuteLedger`, `size` prop** (`strip`/`bar`/`inline`) built on the pure
   `buildLedger()` in `lib/ledger.ts`. Month cells render the `strip` via
-  FullCalendar `dayCellContent`; section-pane headers and the day-view header
-  render the `bar`; the day-view header also shows the hoverable `inline`.
+  FullCalendar `dayCellContent`.
+- **The 300-minute budget is a single shared total across both kinds** (brief
+  §6), so there is exactly one budget `bar` — the combined whole-day status bar
+  under the header (plus the hoverable `inline` in day view). Section-pane
+  headers show only their own minute subtotal as plain text (e.g. `35m`), never a
+  `/300` bar, to avoid implying a per-section budget.
 
 ## M5 — Polish
 
